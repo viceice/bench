@@ -1,0 +1,11 @@
+﻿syntax = "proto3";
+option csharp_namespace = "Bench.IPC.ProtoBuf";
+
+message PbInteropObject {
+    map<string, string> props = 1;
+
+    string ContentType = 2;
+
+    bytes Data = 3;
+
+}

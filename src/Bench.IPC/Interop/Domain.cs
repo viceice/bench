@@ -1,10 +1,11 @@
-﻿using ProtoBuf;
+﻿using Bench.IPC.ProtoBuf;
+using Google.Protobuf;
+using ProtoBuf;
 using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Bench.IPC.Interop
 {
@@ -16,8 +17,7 @@ namespace Bench.IPC.Interop
             {
                 try
                 {
-                    System.Diagnostics.Debugger.Launch();
-                    using (var pipe = new NamedPipeClientStream(args[0]))
+                    using (var pipe = new NamedPipeClientStream(args[0] + ".Test"))
                     {
                         pipe.Connect();
                         Console.WriteLine("Client connected ...");
@@ -33,12 +33,51 @@ namespace Bench.IPC.Interop
                 }
                 catch { }
             });
+
+            ThreadPool.QueueUserWorkItem((s) =>
+            {
+                try
+                {
+                    using (var pipe = new NamedPipeClientStream(args[0] + ".Google"))
+                    {
+                        pipe.Connect();
+                        Console.WriteLine("GoogleClient connected ...");
+                        while (pipe.IsConnected)
+                        {
+                            var request = PbInteropObject.Parser.ParseDelimitedFrom(pipe);
+                            var resp = new ProtoBuf.PbInteropObject { ContentType = request.ContentType, Data = request.Data };
+                            resp.WriteDelimitedTo(pipe);
+                            pipe.WaitForPipeDrain();
+                        }
+
+                        Console.WriteLine("GoogleClient exiting ...");
+                    }
+                }
+                catch { }
+            });
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Processing()
         {
             //Thread.Sleep(50);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static PbInteropObject ProcessPipe(NamedPipeServerStream pipe, PbInteropObject req)
+        {
+            try
+            {
+                if (!pipe.IsConnected)
+                    throw new InvalidOperationException("Missing pipe client");
+                req.WriteDelimitedTo(pipe);
+                pipe.WaitForPipeDrain();
+                return PbInteropObject.Parser.ParseDelimitedFrom(pipe);
+            }
+            finally
+            {
+                Processing();
+            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -87,6 +126,21 @@ namespace Bench.IPC.Interop
             try
             {
                 return new InteropObject { Data = request.Data };
+            }
+            finally
+            {
+                Processing();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public byte[] Process(byte[] request)
+        {
+            try
+            {
+                var p = PbInteropObject.Parser.ParseFrom(request);
+                var res = new PbInteropObject { ContentType = p.ContentType, Data = p.Data };
+                return res.ToByteArray();
             }
             finally
             {

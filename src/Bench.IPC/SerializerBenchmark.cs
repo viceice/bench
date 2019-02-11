@@ -1,10 +1,14 @@
 ﻿using Bench.IPC.Interop;
+using Bench.IPC.ProtoBuf;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
+using Google.Protobuf;
 using ProtoBuf;
 using System.IO;
 
 namespace Bench.IPC
 {
+    [Orderer(SummaryOrderPolicy.FastestToSlowest)]
     public class SerializerBenchmark : BenchmarkBase
     {
         protected override int RunCount => 512;
@@ -19,7 +23,20 @@ namespace Bench.IPC
             }
         }
 
-        [Benchmark]
+        private PbInteropObject ProtBufInternalGoogle()
+        {
+            using (var pipe = new MemoryStream())
+            {
+                _bpPackage.WriteDelimitedTo(pipe);
+                pipe.Seek(0, SeekOrigin.Begin);
+                return PbInteropObject.Parser.ParseDelimitedFrom(pipe);
+            }
+        }
+
+        [Benchmark(Baseline = true)]
         public object ProtoBuf() => Run(ProtBufInternal);
+
+        [Benchmark]
+        public object ProtoBufGoogle() => Run(ProtBufInternalGoogle);
     }
 }

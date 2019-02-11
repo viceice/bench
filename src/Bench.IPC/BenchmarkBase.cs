@@ -1,5 +1,7 @@
 ﻿using Bench.IPC.Interop;
+using Bench.IPC.ProtoBuf;
 using BenchmarkDotNet.Attributes;
+using Google.Protobuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,22 +11,23 @@ namespace Bench.IPC
 {
     public abstract class BenchmarkBase
     {
+        protected PbInteropObject _bpPackage;
         protected InteropObject _request;
 
-        [Params(1 << 10, 1 << 16, 1 << 20)]
+        [Params(10, 14, 15, 16, 19)]
         public int DataSize;
 
-        protected virtual int RunCount => 64;
+        protected virtual int RunCount => 512;
 
-        private byte[] GetData()
+        protected byte[] GetData()
         {
-            var res = new byte[DataSize];
+            var res = new byte[1 << DataSize];
             new Random().NextBytes(res);
             return res;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        protected IEnumerable<InteropObject> Run(Func<InteropObject> f)
+        protected IEnumerable<T> Run<T>(Func<T> f)
            => Enumerable.Range(0, RunCount).Select(i => f()).ToArray();
 
         [GlobalCleanup]
@@ -35,7 +38,10 @@ namespace Bench.IPC
         [GlobalSetup]
         public virtual void GlobalSetup()
         {
-            _request = new InteropObject { Data = GetData() };
+            Console.WriteLine($"Runs: {RunCount}");
+            var data = GetData();
+            _request = new InteropObject { Data = data };
+            _bpPackage = new PbInteropObject { ContentType = _request.ContentType, Data = ByteString.CopyFrom(data) };
         }
     }
 }
