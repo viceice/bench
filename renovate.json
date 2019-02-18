@@ -1,7 +1,9 @@
 {
   "extends": [
-    "config:base"
-  ],
-  "assignees": ["viceice"],
-  "reviewers": ["viceice"]
+    "config:base",
+    ":labels(depedendencies,devops)",
+    ":assignAndReview(viceice)",
+    ":automergePatch",
+    ":automergeDigest"
+  ]
 }
