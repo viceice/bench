@@ -2,10 +2,11 @@
   "extends": [
     "config:base",
     ":labels(depedendencies,devops)",
-    ":assignAndReview(ViceIce)",
+    ":assignee(viceice)",
     ":automergePatch",
     ":automergeDigest",
     ":pinSkipCi",
-    ":prNotPending"
+    ":prNotPending",
+    ":masterIssue"
   ]
 }
