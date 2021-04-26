@@ -10,7 +10,7 @@
         <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
         <PackageReference Include="Google.Protobuf" Version="3.14.0" />
         <PackageReference Include="MsBuild.ProtocolBuffers" Version="1.2.0" />
-        <PackageReference Include="protobuf-net" Version="3.0.73" />
+        <PackageReference Include="protobuf-net" Version="3.0.101" />
     </ItemGroup>
 
     <ItemGroup>
