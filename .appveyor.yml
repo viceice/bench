@@ -2,7 +2,7 @@ pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
-  - master
+  - main
   - dev
   - /renovate\/.*/
 skip_tags: true
