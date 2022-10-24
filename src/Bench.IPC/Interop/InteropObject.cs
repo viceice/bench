@@ -11,11 +11,11 @@ namespace Bench.IPC.Interop
     [Serializable]
     public class InteropObject
     {
-        protected static readonly Encoding Utf8 = Encoding.UTF8;
-
         [DataMember]
         [ProtoMember(1)]
         private IDictionary<string, string> _props;
+
+        public static readonly Encoding Utf8 = new UTF8Encoding(false);
 
         [DataMember]
         [ProtoMember(2)]
@@ -35,6 +35,5 @@ namespace Bench.IPC.Interop
             ContentType = "text/plain;charset=" + Utf8.WebName;
             _props = new Dictionary<string, string>();
         }
-
     }
 }
