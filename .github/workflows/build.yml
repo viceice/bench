@@ -11,17 +11,17 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 15
 
-    strategy:
-      matrix:
-        dotnet-version: [6.0.x]
+    # strategy:
+    #   matrix:
+    #     dotnet-version: [6.0.x]
 
     steps:
       - uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # tag=v3.0.0
 
-      - name: Setup .NET ${{ matrix.dotnet-version }}
-        uses: actions/setup-dotnet@9211491ffb35dd6a6657ca4f45d43dfe6e97c829 # tag=v2.0.0
-        with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+      # - name: Setup .NET ${{ matrix.dotnet-version }}
+      #   uses: actions/setup-dotnet@9211491ffb35dd6a6657ca4f45d43dfe6e97c829 # tag=v2.0.0
+      #   with:
+      #     dotnet-version: ${{ matrix.dotnet-version }}
 
       - name: restore packages
         run: dotnet restore
